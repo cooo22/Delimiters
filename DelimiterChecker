@@ -1,0 +1,78 @@
+/* Description: Checks whether the delimiters ( ), [ ] and { } in a line of text
+   are properly matched and nested, using a stack (LIFO).
+   Programmed by: Terence john Martin BSIT  CC104  DATA STRUCTURES AND ALGORITHMS 
+   Last Modified: October 12, 2026
+   Version: 1.0
+*/
+import java.util.Scanner;
+
+public class DelimiterChecker {
+
+    // ---------- Simple array-based stack of characters ----------
+    static class CharStack {
+        private char[] data = new char[10];
+        private int size = 0;
+
+        void push(char c) {
+            if (size == data.length) {                 // grow when full
+                char[] bigger = new char[data.length * 2];
+                System.arraycopy(data, 0, bigger, 0, size);
+                data = bigger;
+            }
+            data[size++] = c;
+        }
+
+        char pop()  { return data[--size]; }           // remove and return top
+        char peek() { return data[size - 1]; }         // look at top only
+        boolean isEmpty() { return size == 0; }
+    }
+
+    // Returns the opening delimiter that belongs to a closing delimiter
+    static char opener(char close) {
+        if (close == ')') return '(';
+        if (close == ']') return '[';
+        return '{';
+    }
+
+    static boolean isOpening(char c) { return c == '(' || c == '[' || c == '{'; }
+    static boolean isClosing(char c) { return c == ')' || c == ']' || c == '}'; }
+
+    // Checks the input and returns "Valid" or "Invalid - <reason>"
+    static String check(String input) {
+        CharStack stack = new CharStack();
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+
+            if (isOpening(c)) {
+                stack.push(c);                                     // push every opener
+            } else if (isClosing(c)) {
+                if (stack.isEmpty()) {                             // nothing to match
+                    return "Invalid - closing delimiter '" + c
+                         + "' at position " + (i + 1) + " has no matching opening delimiter";
+                }
+                char top = stack.peek();                           // examine the top
+                if (top == opener(c)) {
+                    stack.pop();                                   // matched: remove it
+                } else {
+                    return "Invalid - mismatched delimiters: '" + c
+                         + "' at position " + (i + 1) + " does not match '" + top + "'";
+                }
+            }
+            // any other character is ignored
+        }
+
+        if (!stack.isEmpty()) {
+            return "Invalid - unmatched opening delimiter '" + stack.peek() + "' remains";
+        }
+        return "Valid";
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter a sequence of characters: ");
+        String input = sc.hasNextLine() ? sc.nextLine() : "";
+        System.out.println(check(input));
+        sc.close();
+    }
+}
